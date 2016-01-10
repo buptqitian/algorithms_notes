@@ -5,6 +5,7 @@ struct Node
 {
     int key;
     Node *left, *right;
+    int attach;
     Node (int k = 0, Node *l = NULL, Node *r = NULL)
     {
         key = k;
@@ -53,7 +54,7 @@ void insert(Node **root, int value)
         current_root = current_root->left;
     }
 
-    if(value >(*root)->key)
+    if(value > current_root->key)
     {
         insert(&current_root->right, value);
         current_root = current_root->right;
