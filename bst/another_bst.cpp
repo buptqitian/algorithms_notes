@@ -145,18 +145,18 @@ void BST::remove(int key)
                 {
                     Node *parent = find_parent(key);
                     if(key < parent->key)
-                {
-                    parent->left = NULL;
+                    {
+                        parent->left = NULL;
+                    }
+                    else
+                    {
+                        parent->right = NULL;
+                    }
                 }
                 else
                 {
-                    parent->right = NULL;
+                    root = NULL;
                 }
-            }
-            else
-            {
-                root = NULL;
-            }
                 delete p;
             }
             else if(p->left != NULL && p->right == NULL)
