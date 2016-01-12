@@ -4,13 +4,15 @@ using namespace std;
 struct Node
 {
     int key;
-    Node *left, *right;
-    int attach;
-    Node (int k = 0, Node *l = NULL, Node *r = NULL)
+    int count;
+    Node *left, *right, *parent;
+    Node (int k = 0,int c = 1, Node *l = NULL, Node *r = NULL, Node *p = NULL)
     {
         key = k;
+        count = c;
         left = l;
         right = r;
+        parent = p;
     }
 
 };
@@ -20,7 +22,7 @@ void in_order(Node *root)
     if(root == NULL)
         return;
     in_order(root->left);
-    cout << root->key << " ";
+    cout << root->key << "(" << root->count << ") ";
     in_order(root->right);
 }
 
@@ -28,7 +30,7 @@ void left_order(Node *root)
 {
     if (root == NULL)
         return;
-    cout << root->key << " ";
+    cout << root->key << "(" << root->count << ") ";
     left_order(root->left);
     left_order(root->right);
 }
@@ -39,25 +41,30 @@ void right_order(Node *root)
         return;
     right_order(root->left);
     right_order(root->right);
-    cout << root->key << " ";
+    cout << root->key << "(" << root->count << ") ";
 }
 
-void insert(Node **root, int value)
+void insert_node(Node **root, int key)
 {
-    Node *new_node = new Node(value);
+    *p = *root;
     if(*root == NULL)
+    {
+        Node *new_node = new Node(key);
         *root = new_node;
-    Node *current_root = *root;
-    if(value < current_root->key)
-    {
-        insert(&current_root->left, value);
-        current_root = current_root->left;
+        return;
     }
+    Node *current_root = *root;
 
-    if(value > current_root->key)
+    if(key < current_root->key)
+        insert_node(&current_root->left, key);
+
+    if(key > current_root->key)
+        insert_node(&current_root->right, key);
+
+    if(key == current_root->key)
     {
-        insert(&current_root->right, value);
-        current_root = current_root->right;
+        current_root->count++;
+        return;
     }
 
 }
@@ -93,6 +100,55 @@ Node *find_max(Node *root)
 }
 
 
+void delete_node(Node **root, int key)
+{
+    Node *current_root = *root;
+    if(current_root == NULL)
+        return;
+    if(key < current_root->key)
+        delete_node(&current_root->left, key);
+
+    if(key > current_root->key)
+        delete_node(&current_root->right, key);
+
+    if(key == current_root->key)
+    {
+        if(current_root->count > 1)
+        {
+            current_root->count--;
+            return;
+        }
+
+        if(current_root->left != NULL && current_root->right != NULL)
+        {
+            Node *temp = find_min(current_root->right);
+            current_root->key = temp->key;
+            current_root->count = temp->count;
+            delete_node(&temp, temp->key);
+
+        }
+        else
+        {
+            if(current_root->left == NULL)
+            {
+                current_root->key = current_root->right->key;
+                current_root->count = current_root->right->count;
+                current_root->left = NULL;
+                delete current_root->right;
+                current_root->right = NULL;
+            }
+            else
+            {
+                current_root->key = current_root->left->key;
+                current_root->count = current_root->left->count;
+                current_root->right = NULL;
+                delete current_root->left;
+                current_root->left = NULL;
+            }
+        }
+    }
+}
+
 /*
 TODO:
     add delete node
@@ -102,31 +158,24 @@ TODO:
 
 int main()
 {
-    int a[] = {1, 4, 7, 2};
+    int a[] = {1, 4, 2, 5, 9, 2};
+    int length = sizeof(a)/sizeof(int);
     Node *root = NULL;
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < length; i++)
     {
-        insert(&root, a[i]);
+        insert_node(&root, a[i]);
     }
     in_order(root);
     cout << endl;
-    left_order(root);
+
+    delete_node(&root, 2);
+    in_order(root);
     cout << endl;
-    right_order(root);
+
+    delete_node(&root, 1);
+    in_order(root);
     cout << endl;
 
 
-    Node *p = find_value(root, 4);
-    cout << p << endl;
-    cout << p->key << endl;
-
-    Node *p1 = find_value(root, 8);
-    cout << p1 << endl;
-
-    Node *min = find_min(root);
-    cout << min->key << endl;
-
-    Node *max = find_max(root);
-    cout << max->key << endl;
     return 0;
 }
